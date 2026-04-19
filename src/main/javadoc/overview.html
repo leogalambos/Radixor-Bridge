@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Radixor-Lucene Overview</title>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.55;
+      margin: 2rem auto;
+      max-width: 980px;
+      padding: 0 1.25rem;
+      color: #1f2937;
+      background: #ffffff;
+    }
+    h1, h2, h3 {
+      color: #111827;
+    }
+    h1 {
+      border-bottom: 2px solid #d1d5db;
+      padding-bottom: 0.4rem;
+      margin-bottom: 1rem;
+    }
+    code {
+      font-family: "DejaVu Sans Mono", Consolas, monospace;
+      background: #f3f4f6;
+      padding: 0.08rem 0.3rem;
+      border-radius: 4px;
+    }
+    pre {
+      background: #f3f4f6;
+      padding: 0.9rem 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    .note {
+      border-left: 4px solid #2563eb;
+      background: #eff6ff;
+      padding: 0.85rem 1rem;
+      margin: 1rem 0;
+    }
+    .muted {
+      color: #4b5563;
+    }
+    ul, ol {
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Radixor-Lucene</h1>
+
+  <p>
+    <strong>Radixor-Lucene</strong> is a dedicated Apache Lucene 10 adapter for
+    <strong>Radixor</strong>. It enables the use of Radixor stemming models inside Lucene analysis
+    pipelines while keeping Lucene dependencies out of the Radixor core project.
+  </p>
+
+  <p>
+    The module is intentionally narrow in scope. Radixor remains responsible for stemming data,
+    patch-command encoding and application, dictionary parsing, compiled trie persistence, and
+    runtime stemming semantics. Radixor-Lucene is responsible only for Lucene-facing integration:
+    token-stream processing, analyzer wiring, factory-based configuration, and SPI-oriented loading.
+  </p>
+
+  <h2>Purpose</h2>
+
+  <p>
+    This project is intended for search systems that want to use Radixor stemming in Lucene-based
+    analysis chains without embedding Lucene concerns into the core stemming toolkit.
+    It is especially relevant in environments where one would otherwise consider:
+  </p>
+
+  <ul>
+    <li>Stempel-style stemming,</li>
+    <li>Porter-family stemmers for multiple languages, or</li>
+    <li>a compact dictionary-trained stemmer that remains operationally simple.</li>
+  </ul>
+
+  <h2>What the adapter provides</h2>
+
+  <ul>
+    <li><strong>A Lucene <code>TokenFilter</code></strong> that applies Radixor stemming to token terms.</li>
+    <li><strong>A Lucene <code>TokenFilterFactory</code></strong> suitable for SPI and <code>CustomAnalyzer</code> usage.</li>
+    <li><strong>A Lucene <code>Analyzer</code></strong> convenience wrapper for direct programmatic use.</li>
+    <li><strong>Configurable model activation paths</strong> for bundled languages, text resources, binary resources, and binary files.</li>
+    <li><strong>Deterministic runtime behavior</strong> aligned with the Radixor compiled trie model.</li>
+  </ul>
+
+  <h2>Runtime behavior</h2>
+
+  <p>
+    The runtime operation is intentionally small and direct:
+  </p>
+
+  <ol>
+    <li>Read the current token from Lucene's <code>CharTermAttribute</code>.</li>
+    <li>Look up the token in a Radixor patch-command trie.</li>
+    <li>Apply the returned patch command to the original token.</li>
+    <li>Replace the term only when the transformation is valid and meaningful.</li>
+  </ol>
+
+  <p>
+    Tokens marked with Lucene's keyword attribute are preserved unchanged.
+    Unknown terms, malformed patch commands, empty results, and identity transformations also
+    preserve the original token rather than introducing surprising behavior into the analysis chain.
+  </p>
+
+  <h2>Configuration model</h2>
+
+  <p>
+    Radixor-Lucene is designed for ergonomic multi-language use.
+    A stemmer can be activated in several ways, with the default configuration using the bundled
+    <code>US_UK_PROFI</code> model.
+  </p>
+
+  <ul>
+    <li><strong>Default bundled language</strong> when no explicit source is configured.</li>
+    <li><strong>Explicit bundled language</strong> via a language parameter.</li>
+    <li><strong>Classpath text dictionary resource</strong> for dictionary-driven loading.</li>
+    <li><strong>Classpath binary resource</strong> for compiled binary model loading.</li>
+    <li><strong>Filesystem binary path</strong> for operational deployment of compiled artifacts.</li>
+    <li><strong>Custom provider override</strong> for advanced or application-specific loading strategies.</li>
+  </ul>
+
+  <div class="note">
+    For ordinary use, applications should prefer the built-in configuration paths
+    rather than custom providers. Custom providers are intended mainly for advanced integrations,
+    controlled deployments, or specialized test scenarios.
+  </div>
+
+  <h2>Design principles</h2>
+
+  <ul>
+    <li><strong>Separation of concerns:</strong> Radixor handles stemming; Radixor-Lucene handles Lucene integration.</li>
+    <li><strong>Operational clarity:</strong> model loading is explicit and predictable.</li>
+    <li><strong>Determinism:</strong> token transformation follows Radixor's compiled stemming semantics.</li>
+    <li><strong>Compactness:</strong> the adapter remains small instead of becoming a second stemming engine.</li>
+    <li><strong>Maintainability:</strong> Lucene-specific evolution is isolated from the core stemming implementation.</li>
+  </ul>
+
+  <h2>Main entry points</h2>
+
+  <ul>
+    <li><code>org.egothor.stemmer.lucene.RadixorFilter</code></li>
+    <li><code>org.egothor.stemmer.lucene.RadixorFilterFactory</code></li>
+    <li><code>org.egothor.stemmer.lucene.RadixorAnalyzer</code></li>
+    <li><code>org.egothor.stemmer.lucene.RadixorPatchTrieStemmer</code></li>
+  </ul>
+
+  <h2>Typical usage</h2>
+
+  <h3>Programmatic analyzer usage</h3>
+  <pre><code>Analyzer analyzer = RadixorAnalyzer.forDefaultBundledLanguage();</code></pre>
+
+  <h3>Lucene CustomAnalyzer usage</h3>
+  <pre><code>Analyzer analyzer = CustomAnalyzer.builder()
+    .withTokenizer("standard")
+    .addTokenFilter("radixor")
+    .build();</code></pre>
+
+  <h3>Explicit language selection</h3>
+  <pre><code>Analyzer analyzer = CustomAnalyzer.builder()
+    .withTokenizer("standard")
+    .addTokenFilter("radixor", "language", "DE_DE")
+    .build();</code></pre>
+
+  <h2>Project scope</h2>
+
+  <p>
+    Radixor-Lucene is not a full morphological analysis framework. It is a focused integration layer
+    for applying Radixor stemming models inside Lucene. Its value lies in a fast, compact,
+    deterministic, and operationally practical stemming path for real search systems.
+  </p>
+
+  <p class="muted">
+    License: BSD-3-Clause, aligned with the Radixor project.
+  </p>
+</body>
+</html>

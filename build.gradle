@@ -1,0 +1,327 @@
+plugins {
+    id 'java-library'
+    id 'eclipse'
+    id 'maven-publish'
+    id 'signing'
+    id 'pmd'
+    id 'jacoco'
+    alias(libs.plugins.pitest)
+    alias(libs.plugins.git.version)
+}
+
+group = 'org.egothor'
+version = gitVersion(prefix:'release@')
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
+dependencyLocking {
+    lockAllConfigurations()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 21
+    options.compilerArgs.addAll([
+            '-Xlint:all',
+            '-Werror'
+    ])
+}
+
+tasks.withType(JavaCompile).configureEach {
+	options.encoding = 'UTF-8'
+    options.release = 21
+    options.compilerArgs.addAll([
+            '-Xlint:all'
+    ])
+}
+
+dependencies {
+    api(libs.radixor)
+
+    implementation(libs.lucene.core)
+    implementation(libs.lucene.analysis.common)
+
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.lucene.test.framework)
+    testRuntimeOnly(libs.junit.platform.launcher)
+}
+
+pmd {
+    consoleOutput = true
+    toolVersion = libs.versions.pmd.get()
+    sourceSets = [sourceSets.main]
+    ruleSetFiles = files(rootProject.file(".ruleset"))
+}
+
+jacoco {
+    toolVersion = libs.versions.jacoco.get()
+}
+    
+tasks.named('check') {
+    dependsOn(tasks.named('jacocoTestReport'))
+}
+
+pitest {
+    pitestVersion = libs.versions.pitest.get()
+    junit5PluginVersion = libs.versions.pitestJunit5Plugin.get()
+
+    targetClasses = [
+        'org.egothor.stemmer.lucene.*'
+    ]
+    targetTests = [
+        'org.egothor.stemmer.lucene.*Test'
+    ]
+    
+    excludedClasses = [
+        'org.egothor.stemmer.lucene.*Provider'
+    ]
+    excludedTestClasses = [
+        'org.egothor.stemmer.lucene.ProviderTests'
+    ]
+
+    outputFormats = ['XML', 'HTML']
+    timestampedReports = false
+    exportLineCoverage = true
+    failWhenNoMutations = true
+    threads = Math.max(1, Runtime.runtime.availableProcessors().intdiv(2))
+}
+
+tasks.withType(Pmd).configureEach {
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+tasks.named('test', Test).configure {
+    useJUnitPlatform()
+    
+    finalizedBy(tasks.named('jacocoTestReport'))
+
+    reports {
+        junitXml.required = true
+        html.required = true
+    }
+    
+}
+
+javadoc {
+    failOnError = true
+
+    options.addStringOption('Xdoclint:all,-missing', '-quiet')
+    options.addBooleanOption('html5', true)
+    options.tags('apiNote:a:API Note:')
+    options.tags('implSpec:a:Implementation Requirements:')
+    options.tags('implNote:a:Implementation Note:')
+    options.tags('param')
+    options.tags('return')
+    options.tags('throws')
+    options.tags('since')
+    options.tags('version')
+    options.tags('serialData')
+    options.tags('factory')
+    options.tags('see')
+
+    options.use = true
+    options.author = true
+    options.version = true
+    options.windowTitle = 'Radixor-Lucene - integration module for Radixor stemming'
+    options.docTitle = 'Radixor-Lucene - integration module for Radixor stemming API'
+    options.overview = file('src/main/javadoc/overview.html')
+    options.bottom = """
+        <div class="legal-copy">
+            &copy; 2026 Egothor
+            <br/>
+            Licensed under <a href="https://github.com/leogalambos/Radixor-Lucene/blob/main/LICENSE">BSD-3-Clause</a>
+        </div>
+    """
+    options.links('https://docs.oracle.com/en/java/javase/21/docs/api/')
+    options.group('Integration module for Radixor stemming', 'org.egothor.stemmer.lucene')
+
+    source = sourceSets.main.allJava
+}
+    
+tasks.named('jacocoTestReport', JacocoReport) {
+    dependsOn(tasks.named('test'))
+
+    reports {
+        xml.required = true
+        csv.required = false
+        html.required = true
+    }
+}
+
+import java.security.MessageDigest
+
+def publicationArtifactId = providers.gradleProperty('mavenArtifactId').orElse('radixor').get()
+
+def pomName = providers.gradleProperty('pomName').orElse('Radixor-Lucene').get()
+def pomDescription = providers.gradleProperty('pomDescription')
+        .orElse('Apache Lucene integration module for Radixor stemming.')
+        .get()
+def pomUrl = providers.gradleProperty('pomUrl').orNull
+def pomScmUrl = providers.gradleProperty('pomScmUrl').orNull
+def pomScmConnection = providers.gradleProperty('pomScmConnection').orNull
+def pomScmDeveloperConnection = providers.gradleProperty('pomScmDeveloperConnection').orNull
+def pomLicenseName = providers.gradleProperty('pomLicenseName').orNull
+def pomLicenseUrl = providers.gradleProperty('pomLicenseUrl').orNull
+def pomLicenseDistribution = providers.gradleProperty('pomLicenseDistribution').orElse('repo').get()
+def pomDeveloperId = providers.gradleProperty('pomDeveloperId').orElse('egothor').get()
+def pomDeveloperName = providers.gradleProperty('pomDeveloperName').orElse('Leo Galambos').get()
+def pomDeveloperEmail = providers.gradleProperty('pomDeveloperEmail').orElse('egothor@gmail.com').get()
+
+def signingKey = providers.gradleProperty('pomSigningKey')
+        .orElse(providers.environmentVariable('SIGNING_KEY'))
+        .orNull
+
+def signingPassword = providers.gradleProperty('pomSigningPassword')
+        .orElse(providers.environmentVariable('SIGNING_PASSWORD'))
+        .orNull
+
+def centralStagingRepositoryDirectory = layout.buildDirectory.dir('staging-repository')
+def centralBundleDirectory = layout.buildDirectory.dir('central-bundle')
+
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifactId = publicationArtifactId
+
+            pom {
+                name = pomName
+                description = pomDescription
+                url = pomUrl
+
+                licenses {
+                    license {
+                        name = pomLicenseName
+                        url = pomLicenseUrl
+                        distribution = pomLicenseDistribution
+                    }
+                }
+                
+                developers {
+                    developer {
+                        id = pomDeveloperId
+                        name = pomDeveloperName
+                        email = pomDeveloperEmail
+                    }
+                }
+                    
+                scm {
+                    url = pomScmUrl
+                    connection = pomScmConnection
+                    developerConnection = pomScmDeveloperConnection
+                }
+            }
+        }
+    }
+    
+    repositories {
+        maven {
+            name = 'centralStaging'
+            url = centralStagingRepositoryDirectory.get().asFile.toURI()
+        }
+    }
+    
+}
+
+signing {
+    required { !version.toString().endsWith('-SNAPSHOT') }
+    if (signingKey != null && !signingKey.isBlank()) {
+        useInMemoryPgpKeys(signingKey, signingPassword)
+        sign publishing.publications.mavenJava
+    }
+}
+
+tasks.register('validateReleaseMetadata') {
+    group = 'publishing'
+    description = 'Validates release metadata and signing inputs required for Maven bundle generation.'
+
+    doLast {
+        List<String> missing = new ArrayList<>()
+
+        if (pomUrl == null || pomUrl.isBlank()) missing.add('pomUrl')
+        if (pomScmUrl == null || pomScmUrl.isBlank()) missing.add('pomScmUrl')
+        if (pomScmConnection == null || pomScmConnection.isBlank()) missing.add('pomScmConnection')
+        if (pomScmDeveloperConnection == null || pomScmDeveloperConnection.isBlank()) missing.add('pomScmDeveloperConnection')
+        if (pomLicenseName == null || pomLicenseName.isBlank()) missing.add('pomLicenseName')
+        if (pomLicenseUrl == null || pomLicenseUrl.isBlank()) missing.add('pomLicenseUrl')
+        if (signingKey == null || signingKey.isBlank()) missing.add('pomSigningKey / SIGNING_KEY')
+        if (signingPassword == null || signingPassword.isBlank()) missing.add('pomSigningPassword / SIGNING_PASSWORD')
+
+        if (!missing.isEmpty()) {
+            throw new GradleException('Missing release metadata: ' + String.join(', ', missing))
+        }
+    }
+}
+    
+tasks.named('publishMavenJavaPublicationToCentralStagingRepository') {
+    dependsOn(tasks.named('validateReleaseMetadata'))
+}
+
+tasks.register('createCentralChecksums') {
+    group = 'publishing'
+    description = 'Creates MD5 and SHA-1 checksums for staged Maven publication artifacts.'
+    dependsOn(tasks.named('publishMavenJavaPublicationToCentralStagingRepository'))
+
+    doLast {
+        File root = centralStagingRepositoryDirectory.get().asFile
+        root.eachFileRecurse { File file ->
+            if (file.isFile() && !file.name.endsWith('.md5') && !file.name.endsWith('.sha1')) {
+                byte[] bytes = file.bytes
+                new File(file.absolutePath + '.md5').text =
+                        MessageDigest.getInstance('MD5').digest(bytes).encodeHex().toString()
+                new File(file.absolutePath + '.sha1').text =
+                        MessageDigest.getInstance('SHA-1').digest(bytes).encodeHex().toString()
+            }
+        }
+    }
+}
+
+tasks.register('centralBundle', Zip) {
+    group = 'publishing'
+    description = 'Builds a Maven Central-compatible deployment bundle ZIP.'
+
+    dependsOn(tasks.named('createCentralChecksums'))
+
+    from(centralStagingRepositoryDirectory) {
+        exclude '**/maven-metadata*.xml*'
+    }
+
+    destinationDirectory = centralBundleDirectory
+    archiveFileName = "radixor-lucene-${project.version}-central-bundle.zip"
+}
+
+tasks.register('packageReleaseCandidate') {
+    group = 'publishing'
+    description = 'Builds the signed local Central bundle without uploading it.'
+    dependsOn(tasks.named('clean'))
+    dependsOn(tasks.named('centralBundle'))
+}
+
+gradle.taskGraph.whenReady { taskGraph ->
+    def banner = """
+\u001B[34m
+
+8888888888 .d8888b.   .d88888b. 88888888888 888    888  .d88888b.  8888888b.
+888       d88P  Y88b d88P" "Y88b    888     888    888 d88P" "Y88b 888   Y88b
+888       888    888 888     888    888     888    888 888     888 888    888
+8888888   888        888     888    888     8888888888 888     888 888   d88P
+888       888  88888 888     888    888     888    888 888     888 8888888P"
+888       888    888 888     888    888     888    888 888     888 888 T88b
+888       Y88b  d88P Y88b. .d88P    888     888    888 Y88b. .d88P 888  T88b
+8888888888 "Y8888P88  "Y88888P"     888     888    888  "Y88888P"  888   T88b
+
+\u001B[36m
+ Project : ${project.name}
+ Version : ${project.version}
+\u001B[0m
+"""
+    println banner
+}
