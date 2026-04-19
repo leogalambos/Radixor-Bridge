@@ -2,7 +2,7 @@
 
 [![Quality gates](https://github.com/leogalambos/radixor-lucene/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/leogalambos/radixor-lucene/actions/workflows/build.yml)
 [![Maven Central](https://img.shields.io/maven-central/v/org.egothor/radixor-lucene)](https://central.sonatype.com/artifact/org.egothor/radixor-lucene)
-[![License](https://img.shields.io/github/license/leogalambos/radixor-lucene)](LICENSE)
+[![License](https://img.shields.io/github/license/leogalambos/radixor%2dlucene)](LICENSE)
 [![Java](https://img.shields.io/badge/Java-21%2B-brightgreen)](#)
 [![Lucene](https://img.shields.io/badge/Lucene-10.4.0-blue)](#)
 
