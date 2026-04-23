@@ -1,14 +1,16 @@
 <img src="Radixor-Lucene.jpg" width="100%" align="left" alt="Radixor logo" />
 
-[![Quality gates](https://github.com/leogalambos/radixor-lucene/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/leogalambos/radixor-lucene/actions/workflows/build.yml)
-[![Maven Central](https://img.shields.io/maven-central/v/org.egothor/radixor-lucene)](https://central.sonatype.com/artifact/org.egothor/radixor-lucene)
-[![License](https://img.shields.io/github/license/leogalambos/radixor%2dlucene)](LICENSE)
+[![Quality gates](https://github.com/leogalambos/radixor-bridge/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/leogalambos/radixor-bridge/actions/workflows/build.yml)
+[![Maven Central](https://img.shields.io/maven-central/v/org.egothor/radixor-bridge)](https://central.sonatype.com/artifact/org.egothor/radixor-bridge)
+[![License](https://img.shields.io/github/license/leogalambos/radixor%2dbridge)](LICENSE)
 [![Java](https://img.shields.io/badge/Java-21%2B-brightgreen)](#)
 [![Lucene](https://img.shields.io/badge/Lucene-10.4.0-blue)](#)
 
 *Apache Lucene integration module for Radixor stemming.*
 
-**Radixor Lucene** is a dedicated bridge module that adapts **Radixor** to **Apache Lucene 10**. It builds on the Radixor runtime model of compiled patch-command tries and applies those transformations inside Lucene token streams through a focused integration layer rather than by introducing Lucene-specific concerns into the core project.
+**Radixor Bridge** is a dedicated bridge module that adapts **Radixor** to **Apache Lucene 10**.
+It builds on the Radixor runtime model of compiled patch-command tries and applies those transformations
+inside Lucene token streams through a focused integration layer rather than by introducing Lucene-specific concerns into the core project.
 
 It is particularly well suited to systems that need stemming which is:
 
@@ -31,11 +33,11 @@ It is particularly well suited to systems that need stemming which is:
 - [Project philosophy](#project-philosophy)
 - [License](#license)
 
-## Why Radixor Lucene
+## Why Radixor in Lucene
 
 The core Radixor project should remain focused on stemming itself: dictionary loading, patch-command encoding and application, compiled trie persistence, and deterministic runtime lookup.
 
-The Lucene bridge therefore exists as a separate artifact so that:
+The bridge therefore exists as a separate artifact so that:
 
 - `org.egothor:radixor` remains free of Lucene as an incoming dependency,
 - Lucene-facing code can evolve on the cadence of Lucene integration needs,
@@ -72,8 +74,8 @@ Tokens marked with `KeywordAttribute` are preserved unchanged. Missing keys, mal
 
 ```gradle
 dependencies {
-    implementation("org.egothor:radixor:1.0.0")
-    implementation("org.egothor:radixor-lucene:1.0.0")
+    implementation("org.egothor:radixor:2.0.0")
+    implementation("org.egothor:radixor-bridge:2.0.0")
 }
 ```
 

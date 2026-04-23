@@ -5,7 +5,7 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'Radixor-Lucene'
+rootProject.name = 'Radixor-Bridge'
 
 dependencyResolutionManagement {
     repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS

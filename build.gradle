@@ -129,14 +129,14 @@ javadoc {
     options.use = true
     options.author = true
     options.version = true
-    options.windowTitle = 'Radixor-Lucene - integration module for Radixor stemming'
-    options.docTitle = 'Radixor-Lucene - integration module for Radixor stemming API'
+    options.windowTitle = 'Radixor-Bridge - integration module for Radixor stemming in Lucene'
+    options.docTitle = 'Radixor-Bridge - integration module for Radixor stemming API in Lucene'
     options.overview = file('src/main/javadoc/overview.html')
     options.bottom = """
         <div class="legal-copy">
             &copy; 2026 Egothor
             <br/>
-            Licensed under <a href="https://github.com/leogalambos/Radixor-Lucene/blob/main/LICENSE">BSD-3-Clause</a>
+            Licensed under <a href="https://github.com/leogalambos/Radixor-Bridge/blob/main/LICENSE">BSD-3-Clause</a>
         </div>
     """
     options.links('https://docs.oracle.com/en/java/javase/21/docs/api/')
@@ -159,7 +159,7 @@ import java.security.MessageDigest
 
 def publicationArtifactId = providers.gradleProperty('mavenArtifactId').orElse('radixor').get()
 
-def pomName = providers.gradleProperty('pomName').orElse('Radixor-Lucene').get()
+def pomName = providers.gradleProperty('pomName').orElse('Radixor-Bridge').get()
 def pomDescription = providers.gradleProperty('pomDescription')
         .orElse('Apache Lucene integration module for Radixor stemming.')
         .get()
@@ -295,7 +295,7 @@ tasks.register('centralBundle', Zip) {
     }
 
     destinationDirectory = centralBundleDirectory
-    archiveFileName = "radixor-lucene-${project.version}-central-bundle.zip"
+    archiveFileName = "radixor-bridge-${project.version}-central-bundle.zip"
 }
 
 tasks.register('packageReleaseCandidate') {

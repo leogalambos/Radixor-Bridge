@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Radixor-Lucene Overview</title>
+  <title>Radixor-Bridge Overview</title>
   <style>
     body {
       font-family: Arial, Helvetica, sans-serif;
@@ -50,10 +50,10 @@
   </style>
 </head>
 <body>
-  <h1>Radixor-Lucene</h1>
+  <h1>Radixor-Bridge</h1>
 
   <p>
-    <strong>Radixor-Lucene</strong> is a dedicated Apache Lucene 10 adapter for
+    <strong>Radixor-Bridge</strong> is a dedicated Apache Lucene 10 adapter for
     <strong>Radixor</strong>. It enables the use of Radixor stemming models inside Lucene analysis
     pipelines while keeping Lucene dependencies out of the Radixor core project.
   </p>
@@ -61,7 +61,7 @@
   <p>
     The module is intentionally narrow in scope. Radixor remains responsible for stemming data,
     patch-command encoding and application, dictionary parsing, compiled trie persistence, and
-    runtime stemming semantics. Radixor-Lucene is responsible only for Lucene-facing integration:
+    runtime stemming semantics. Radixor-Bridge is responsible only for Lucene-facing integration:
     token-stream processing, analyzer wiring, factory-based configuration, and SPI-oriented loading.
   </p>
 
@@ -111,7 +111,7 @@
   <h2>Configuration model</h2>
 
   <p>
-    Radixor-Lucene is designed for ergonomic multi-language use.
+    Radixor-Bridge is designed for ergonomic multi-language use.
     A stemmer can be activated in several ways, with the default configuration using the bundled
     <code>US_UK_PROFI</code> model.
   </p>
@@ -134,7 +134,7 @@
   <h2>Design principles</h2>
 
   <ul>
-    <li><strong>Separation of concerns:</strong> Radixor handles stemming; Radixor-Lucene handles Lucene integration.</li>
+    <li><strong>Separation of concerns:</strong> Radixor handles stemming; Radixor-Bridge handles Lucene integration.</li>
     <li><strong>Operational clarity:</strong> model loading is explicit and predictable.</li>
     <li><strong>Determinism:</strong> token transformation follows Radixor's compiled stemming semantics.</li>
     <li><strong>Compactness:</strong> the adapter remains small instead of becoming a second stemming engine.</li>
@@ -170,7 +170,7 @@
   <h2>Project scope</h2>
 
   <p>
-    Radixor-Lucene is not a full morphological analysis framework. It is a focused integration layer
+    Radixor-Bridge is not a full morphological analysis framework. It is a focused integration layer
     for applying Radixor stemming models inside Lucene. Its value lies in a fast, compact,
     deterministic, and operationally practical stemming path for real search systems.
   </p>
