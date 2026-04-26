@@ -22,7 +22,7 @@ It is particularly well suited to systems that need stemming which is:
 
 ## Table of Contents
 
-- [Why Radixor Lucene](#why-radixor-lucene)
+- [Why Radixor Bridge](#why-radixor-lucene)
 - [Architecture](#architecture)
 - [Key features](#key-features)
 - [Coordinates](#coordinates)
@@ -222,15 +222,15 @@ The repository keeps the front page concise and places the important operational
 
 ## Project philosophy
 
-Radixor Lucene does not try to turn the Lucene module into a second stemming engine.
+Radixor Bridge does not try to turn the Lucene module into a second stemming engine.
 
 It keeps the valuable split:
 
 - Radixor handles stemming data, compilation, persistence, and patch semantics.
-- Radixor Lucene handles Lucene integration and token-stream behavior.
+- Radixor Bridge handles Lucene integration and token-stream behavior.
 
 That way the bridge stays small, understandable, and operationally robust while still being practical for multi-language deployments.
 
 ## License
 
-Radixor Lucene uses the same BSD-3-Clause style license as the upstream Radixor project.
+Radixor Bridge uses the same BSD-3-Clause style license as the upstream Radixor project.

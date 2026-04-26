@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>Radixor-Lucene</name>
-	<comment>Project Radixor-Lucene created by Buildship.</comment>
+	<name>Radixor-Bridge</name>
+	<comment>Project Radixor-Bridge created by Buildship.</comment>
 	<projects>
 	</projects>
 	<buildSpec>
